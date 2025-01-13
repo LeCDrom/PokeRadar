@@ -134,11 +134,16 @@ while 1:
 
         for x in range(len(sub_area['pokemon_encounters'])):
             pkmn_name = sub_area['pokemon_encounters'][x]['pokemon']['name']
+            poke_dict['pokémon'].append(pkmn_name)
             pkmn_url = sub_area['pokemon_encounters'][x]['pokemon']['url']
-            pkmn = get_data_cached(pkmn_url, 0, f"{pkmn_name}.json")
 
-            for y in range(len()):
-                pass
+            if pkmn_name in poke_dict['pokémon']:
+                print("true")
+                print(pkmn_name)
+                pkmn = get_data_cached(pkmn_url, 0, f"{pkmn_name}.json")
+
+                print_pokestats(pkmn)
+                print("-------------------------------")    # Séparateur
 
 
     print("Terminé !")
