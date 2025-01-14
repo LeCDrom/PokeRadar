@@ -122,6 +122,17 @@ while 1:
     Boucle infinie pour entrer des lieux à la chaîne
     """
 
+    # On crée le répertoire cache
+
+    try:
+        os.mkdir("cache")
+    except FileExistsError:
+        pass
+    except PermissionError:
+        print(f"⚠️ Permission non accordée. Ne peut pas créer le cache")
+    except Exception as e:
+        pass
+
     # On crée le cache principal
 
     root_file = get_data_cached("https://pokeapi.co/api/v2/location/", 1036, "root.json")
