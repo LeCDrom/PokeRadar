@@ -1,6 +1,5 @@
 import requests
 import markdown
-# import rapidfuzz
 import json
 import os
 import matplotlib.pyplot as plt
@@ -205,13 +204,13 @@ def data_to_md(data: dict, filename: str) -> str:
     return output
 
 
-# Affichage sympa
+# Affichage sympa lors du lancement
 
 print(
     """
- __   __        ___  __        __        __  
-|__) /  \ |__/ |__  |__)  /\  |  \  /\  |__) 
-|    \__/ |  \ |___ |  \ /‾‾\ |__/ /‾‾\ |  \\
+ __   __        ___  __   __   __   __   __  
+|__) /  \ |__/ |__  |__) |__| |  \ |__| |__) 
+|    \__/ |  \ |___ |  \ |  | |__/ |  | |  \\
     """
     )
 
@@ -265,7 +264,7 @@ while 1:
         print(f"📋 {url_count} Lieux trouvés\n")
         i = 1
         for name in place_url[1]['results']:  # Affichage des résultats possibles
-            print(f"{i}: {name.replace("-", " ")}")
+            print(f"{i}: {name.replace('-', ' ')}")
             i += 1
         
         while 1:
@@ -309,14 +308,6 @@ while 1:
 
     wait = input(f"[Entrée] Affichage des Pokémons de la zone...")
     print()
-
-
-
-    with open(f"fiche-{formatted_place}.md", "w") as md:
-        md.write("# Fiche PokéRadar\n")
-        md.write("```\n[SAE 15]\nDAIRIN Côme\nSCHER Florian\n```\n")
-        md.write(f"## {fr_place_name}\n")
-        md.write(f"Région : {place['region']['name']}\n")
 
     poke_dict = {}
 
@@ -373,3 +364,9 @@ while 1:
         print(f"\n{len(poke_dict)} Pokémons trouvés pour ce lieu.")
         
     print("\n✅ Terminé !")
+
+    with open(f"fiche-{formatted_place}.md", "w") as md:
+        md.write("# Fiche PokéRadar\n")
+        md.write("```\n[SAE 15]\nDAIRIN Côme\nSCHER Florian\n```\n")
+        md.write(f"## {fr_place_name}\n")
+        md.write(f"Région : {place['region']['name']}\n")
