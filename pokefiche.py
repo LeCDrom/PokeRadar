@@ -160,8 +160,8 @@ def get_poke_dict(data: dict) -> dict:
 
     # Taille et poids :
 
-    poke_dict['POKEDEX']['height'] = data['height'] / 100       # Divisé par 100 car affiché en décimètres
-    poke_dict['POKEDEX']['weight'] = data['weight'] / 100       # Divisé par 100 car affiché en décigrammes
+    poke_dict['POKEDEX']['height'] = data['height'] / 10       # Divisé par 10 car affiché en décimètres
+    poke_dict['POKEDEX']['weight'] = data['weight'] / 10       # Divisé par 10 car affiché en décigrammes
 
     # Stats de base et calcul total (somme) :
 

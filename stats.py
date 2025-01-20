@@ -318,7 +318,7 @@ def compute_statistics(poke_dict: dict, filename: str) -> None:
     'Insecte': '#a8b820',  # Vert olive
     'Ténèbres': '#403934',  # Marron sombre (pâle)
     'Dragon': '#7038f8',  # Violet
-    'Elektrik': '#f8d030',  # Jaune
+    'Électrik': '#f8d030',  # Jaune
     'Fée': '#ee99ac',  # Rose clair
     'Combat': '#c03028',  # Maroon 
     'Feu': '#f08030',  # Orange
@@ -376,7 +376,6 @@ def dataset_to_md(poke_dict: dict, filename: str, diagram_name: str) -> None:
     with open(filename, 'w', encoding="utf-8") as md:
         md.write('# PokéRadar - PokéStats\n\n')
         md.write('\n[SAE 15] DAIRIN Côme | SCHER Florian\n\n')
-        print(poke_dict['place_info'])
         md.write(f'# {poke_dict['place_info'][0]}\n\n')
         md.write(f'### - Région : {poke_dict['place_info'][1].capitalize()}\n\n')
         md.write('## Pokémons capturables\n\n')

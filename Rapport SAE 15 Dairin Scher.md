@@ -55,3 +55,5 @@ Les deux programmes traduisent les données en Français lorsque c'est possible.
 - Certains Pokémons ont des données inexistantes. C'est le cas pour les Pokémons légendaires qui n'ont généralement pas d'habitat ou les Ultra-Chimères qui n'ont pas de description. Les valeurs sont alors remplacées par "???" quand nécéssaire.
 - Les deux programmes créent leurs répertoires automatiquement et y stockent les fichiers en sortie.
 - Les documents générés contiennent une balise HTML de style pour changer la police de texte. Les tableaux sont également centrés et une marge a été ajoutée pour façiliter la lecture.
+
+**Erreur connue : quand certaines informations manquent comme le contenu de poke_dict['place_info'], la fiche PokéStats n'est pas générée**
