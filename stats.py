@@ -6,6 +6,7 @@ import json
 import matplotlib.pyplot as plt
 from md_to_html import convert
 import requests
+import re
 
 
 def find_multiple_matches(name: str, data: dict) -> tuple:
@@ -161,9 +162,9 @@ def get_dataset(name: str, root_data) -> dict:
     place_url = find_multiple_matches(formatted_place, root_data)
 
     if place_url[0] == "unknown":
-        print("❌ Lieu inconnu...")
+        print("❌ Lieu inconnu...\n")
         sys.exit()
-    elif place_url[0] == "partial":
+    elif place_url[0] == "partial":     # Match partiel, on doit afficher les résultats possibles
         
         url_count = len(place_url[1]['results'])
         print(f"📋 {url_count} Lieux trouvés\n")
@@ -183,7 +184,7 @@ def get_dataset(name: str, root_data) -> dict:
             else:
                 # Hors de la plage autorisée
                 if not(1 <= usr_choice <= url_count):
-                    print("\n❌ Entrée invalide")
+                    print("\n❌ Plage invalide")
                 else:
                     # Tout va bien à bord, alors on remplace la saisie utilisateur et l'url par le lieu sélectionné
                     formatted_place = place_url[1]['results'][usr_choice-1]
@@ -211,7 +212,7 @@ def get_dataset(name: str, root_data) -> dict:
 
     # Récupère les infos sur les Pokémons en itérant sur la liste obtenue
 
-    wait = input(f"[Entrée] Affichage des Pokémons de la zone...")
+    wait = input(f"\n[Entrée] Affichage des Pokémons de la zone...")
     print()
 
     poke_dict = {
@@ -233,6 +234,7 @@ def get_dataset(name: str, root_data) -> dict:
 
             if pkmn_name not in poke_dict:
                 # Si le Pokémon est déjà affiché, on l'ignore. Sinon, on l'affiche
+                
                 pkmn = request_cached_data(pkmn_url, f"{pkmn_name}.json", verbose=verbose_value)
                 
                 # On récupère les données
@@ -278,9 +280,10 @@ def get_dataset(name: str, root_data) -> dict:
 
     print("\n✅ Recherche terminée !")
     if len(poke_dict['pokemons']) == 0:
-        print(f"\n⚠️  Aucun Pokémon trouvé pour ce lieu.")
+        print(f"\n⚠️  Aucun Pokémons trouvés pour ce lieu.\n")
+        sys.exit()
     else:
-        print(f"\n{len(poke_dict['pokemons'])} Pokémons trouvés pour ce lieu.")
+        print(f"\n{len(poke_dict['pokemons'])} Pokémons trouvés pour ce lieu.\n")
     
     return poke_dict
 
@@ -296,7 +299,7 @@ def compute_statistics(poke_dict: dict, filename: str) -> None:
         'Insecte': 0,
         'Ténèbres': 0,
         'Dragon': 0,
-        'Elektrik': 0,
+        'Électrik': 0,
         'Fée': 0,
         'Combat': 0,
         'Feu': 0,
@@ -314,6 +317,7 @@ def compute_statistics(poke_dict: dict, filename: str) -> None:
     }
 
     # Couleurs pour le diagramme circulaire
+
     color_map = {
     'Insecte': '#a8b820',  # Vert olive
     'Ténèbres': '#403934',  # Marron sombre (pâle)
@@ -335,33 +339,31 @@ def compute_statistics(poke_dict: dict, filename: str) -> None:
     'Eau': '#6890f0'   # Bleu
     }
     
-    for key, value in poke_dict['pokemons'].items():
-    # Vérifier que 'types' existe dans l'entrée actuelle
-        if 'types' in value and isinstance(value['types'], list):
-            for type_ in value['types']:
-                if type_ in types_sorted:
-                    types_sorted[type_] += 1
-                else:
-                    # Si le type n'est pas dans types_sorted, l'initialiser à 1
-                    types_sorted[type_] = 1
+    # Compter les occurrences des types (chaque type est compté indépendamment)
 
-    # Création du diagramme circulaire présentant la répartition des types :
+    total_types = 0  # On compte le total des types, pas des Pokémon
+    for value in poke_dict['pokemons'].values():
+        for type_ in value['types']:
+            types_sorted[type_] += 1
+            total_types += 1            # Chaque type est comptabilisé
 
-    filtered_types = {}
-    for type_, value in types_sorted.items():   # Pour éliminer les types ayant un indice à 0 du diagramme
-        if value > 0:
-            filtered_types[type_] = value
+    # Filtrer les types avec au moins une occurrence
 
-    labels = list(filtered_types.keys())
-    sizes = list(filtered_types.values())
-    colors = [color_map[type_name] for type_name in labels]
+    filtered_types = {t: count for t, count in types_sorted.items() if count > 0}
+
+    # Calcul des pourcentages par rapport au total des types
+
+    percentages = {t: (count / total_types) * 100 for t, count in filtered_types.items()}
+
+    # Préparer les données pour le diagramme
+
+    labels = list(percentages.keys())
+    sizes = list(percentages.values())
+    colors = [color_map[t] for t in labels]
 
     plt.figure(figsize=(7, 7))
     plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=45)
-
-    plt.title("")
-    plt.show
-    plt.savefig(f'./pokestats/{filename}', dpi=300, bbox_inches='tight')
+    plt.savefig(f'./pokestats/{filename}', dpi=300, bbox_inches='tight')    # Sauvegarde du fichier, pas besoin de mettre de titre ou de l'afficher
 
 
 def dataset_to_md(poke_dict: dict, filename: str, diagram_name: str) -> None:
@@ -418,6 +420,7 @@ def infos_locales(en_place_name: str) -> None:
 
     root_data = request_cached_data("https://pokeapi.co/api/v2/location/", "root_place_file.json", 9999, verbose=verbose_value)     # Dictionnaire des lieux
     poke_dict = get_dataset(en_place_name, root_data)
+    print("> Génération de la fiche PokéStats en cours...")
 
     stats = compute_statistics(poke_dict, f"diagram-{en_place_name.replace(" ", "_")}.png")
     diagram_name = f'diagram-{en_place_name.replace(" ", "_")}.png'
@@ -438,39 +441,43 @@ if __name__ == "__main__":
 """
     )
 
-    print(r"\\\\\\\\\\\\\\\\\\\\\\ PokéRadar v1.0 Part 1")
+    print(r"\\\\\\\\\\\\\\\\\\\\\\ PokéRadar v1.0 Part 2")
     print("---------------------- SAE 15 [2.2]")
     print("////////////////////// Côme et Florian\n")
 
-    print('Utilisation : python3 stats.py --verbose=[y|n] <pokemon_place>\n')
+    print('▶ Utilisation : python3 stats.py --verbose=[y|n] <pokemon_place>\n')
 
     place = " ".join(sys.argv[2:])      # On doit convertir tous les arguments après --verbose=[y|n] pour
                                         # obtenir le nom du lieu recherché
-    if "--verbose=y" in sys.argv[1]:
-        verbose_value = True
-        try:
-            infos_locales(place)
-        except requests.exceptions.ConnectionError:
-            print("❌ Connexion refusée.\n")
-        except requests.exceptions.HTTPError:
-            print("❌ La requête est invalide.\n")
-        except requests.exceptions.Timeout:
-            print("❌ La requête a expiré.\n")
-        except json.decoder.JSONDecodeError:
-            print("❌ Une erreur est survenue.\n")
-            print("> Essayez de vider le cache\n")
-    elif "--verbose=n" in sys.argv[1]:
-        verbose_value = False
-        try:
-            infos_locales(place)
-        except requests.exceptions.ConnectionError:
-            print("❌ Connexion refusée.\n")
-        except requests.exceptions.HTTPError:
-            print("❌ La requête est invalide.\n")
-        except requests.exceptions.Timeout:
-            print("❌ La requête a expiré.\n")
-        except json.decoder.JSONDecodeError:
-            print("❌ Une erreur est survenue.\n")
-            print("> Essayez de vider le cache\n")
+    
+    expression = ' '.join(sys.argv)
+    
+    if re.search(r"^stats.py\s--verbose=(y|n)\s[a-zA-Z0-9-\s]+", expression):
+        if "--verbose=y" in sys.argv[1]:
+            verbose_value = True
+            try:
+                infos_locales(place)
+            except requests.exceptions.ConnectionError:
+                print("❌ Connexion refusée.\n")
+            except requests.exceptions.HTTPError:
+                print("❌ La requête est invalide.\n")
+            except requests.exceptions.Timeout:
+                print("❌ La requête a expiré.\n")
+            except json.decoder.JSONDecodeError:
+                print("❌ Une erreur est survenue.\n")
+                print("> Essayez de vider le cache\n")
+        elif "--verbose=n" in sys.argv[1]:
+            verbose_value = False
+            try:
+                infos_locales(place)
+            except requests.exceptions.ConnectionError:
+                print("❌ Connexion refusée.\n")
+            except requests.exceptions.HTTPError:
+                print("❌ La requête est invalide.\n")
+            except requests.exceptions.Timeout:
+                print("❌ La requête a expiré.\n")
+            except json.decoder.JSONDecodeError:
+                print("❌ Une erreur est survenue.\n")
+                print("> Essayez de vider le cache\n")
     else:
-        print(f'❌ Erreur : argument inattendu "{sys.argv[1]}"\n\nUtilisation : python3 stats.py --verbose=[y|n] <pokemon_place>\n')
+        print(f'❌ Erreur : argument inattendu\n')
